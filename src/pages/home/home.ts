@@ -72,6 +72,53 @@ export class HomePage {
     }
     
     container.addChild(groundContainer);
+
+    var runContainer = new PIXI.Container();
+    runContainer.parentGroup = objectGroup;
+
+    var charicTexture = PIXI.BaseTexture.fromImage("assets/imgs/gang_run.png");
+    var charicRunMotions = [];
+    charicRunMotions.push
+    (
+      new PIXI.Texture(charicTexture, new PIXI.Rectangle(0, 0, 300, 350))
+      , new PIXI.Texture(charicTexture, new PIXI.Rectangle(300, 0, 300, 350))
+      , new PIXI.Texture(charicTexture, new PIXI.Rectangle(600, 0, 300, 350))
+      , new PIXI.Texture(charicTexture, new PIXI.Rectangle(900, 0, 300, 350))
+      , new PIXI.Texture(charicTexture, new PIXI.Rectangle(1200, 0, 300, 350))
+      , new PIXI.Texture(charicTexture, new PIXI.Rectangle(1500, 0, 300, 350))
+      , new PIXI.Texture(charicTexture, new PIXI.Rectangle(1800, 0, 300, 350))
+    );
+    var charicTexture = PIXI.BaseTexture.fromImage("assets/imgs/gang_jump.png");
+    var charicJumpMotions = [];
+    charicJumpMotions.push
+    (
+      new PIXI.Texture(charicTexture, new PIXI.Rectangle(0, 0, 300, 350))
+      , new PIXI.Texture(charicTexture, new PIXI.Rectangle(300, 0, 300, 350))
+      , new PIXI.Texture(charicTexture, new PIXI.Rectangle(600, 0, 300, 350))
+      , new PIXI.Texture(charicTexture, new PIXI.Rectangle(900, 0, 300, 350))
+    );
+
+    var charicSprite = new PIXI.Sprite(charicRunMotions[0]);
+    charicSprite.position.y = HEIGHT - 400;    
+
+    runContainer.addChild(charicSprite);
+
+
+    var motionCount = 0;
+    var isJump = false;  
+
+    var onClick = function(){
+      if(isJump == true){
+        return;
+      }      
+      
+      motionCount = 0;
+      isJump = true;
+    };
+
+    window.onclick = onClick;
+    
+    container.addChild(runContainer);
     app.stage.addChild(container);
 
     app.ticker.add(function(delta) {
@@ -80,6 +127,42 @@ export class HomePage {
           delta: delta
         });
       });
+
+      var motions = [];
+
+      if(isJump == true){
+        motionCount = 0;
+        motions = charicJumpMotions;
+
+        if(motions === charicJumpMotions && (motionCount / 5 < 2)){
+          charicSprite.position.y -= 100;
+        }
+        else if(motions === charicJumpMotions && (motionCount / 5 > 2)){
+          charicSprite.position.y += 100;
+        }
+
+        if((motionCount % 10) == 0){
+          charicSprite.texture = motions[(motionCount / 10)];
+        }
+        
+        if(motions === charicJumpMotions && motionCount / (10 * motions.length) == 0){
+          motionCount = 0;
+          isJump = false;
+        }
+      }
+      else {
+        motions = charicRunMotions;
+      }
+
+      motionCount = (motionCount + 1) % (10 * motions.length);
+
+
+
+      if((motionCount % 10) == 0){
+        charicSprite.texture = motions[(motionCount / 10)];
+      }
+
+
     });
   }
 
