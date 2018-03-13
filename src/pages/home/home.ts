@@ -44,7 +44,7 @@ export class HomePage {
       var texture = PIXI.Texture.fromImage("assets/imgs/bamboo.png");
       var sprite = new PIXI.Sprite(texture);
       sprite.on("update" ,function(data){
-        this.position.x = (this.position.x + this.width - data.delta) < 0 ? WIDTH : this.position.x - data.delta;
+        this.position.x = (this.position.x + this.width - 1) < 0 ? WIDTH : this.position.x - 1;
       });
       sprite.position.x = (WIDTH / bambooCount) * index;
       sprite.width = WIDTH / bambooCount;
@@ -76,93 +76,100 @@ export class HomePage {
     var runContainer = new PIXI.Container();
     runContainer.parentGroup = objectGroup;
 
-    var charicTexture = PIXI.BaseTexture.fromImage("assets/imgs/gang_run.png");
-    var charicRunMotions = [];
-    charicRunMotions.push
+    var characterTexture = PIXI.BaseTexture.fromImage("assets/imgs/gang_run.png");
+    var characterRunMotions = [];
+    characterRunMotions.push
     (
-      new PIXI.Texture(charicTexture, new PIXI.Rectangle(0, 0, 300, 350))
-      , new PIXI.Texture(charicTexture, new PIXI.Rectangle(300, 0, 300, 350))
-      , new PIXI.Texture(charicTexture, new PIXI.Rectangle(600, 0, 300, 350))
-      , new PIXI.Texture(charicTexture, new PIXI.Rectangle(900, 0, 300, 350))
-      , new PIXI.Texture(charicTexture, new PIXI.Rectangle(1200, 0, 300, 350))
-      , new PIXI.Texture(charicTexture, new PIXI.Rectangle(1500, 0, 300, 350))
-      , new PIXI.Texture(charicTexture, new PIXI.Rectangle(1800, 0, 300, 350))
+      new PIXI.Texture(characterTexture, new PIXI.Rectangle(0, 0, 300, 350))
+      , new PIXI.Texture(characterTexture, new PIXI.Rectangle(300, 0, 300, 350))
+      , new PIXI.Texture(characterTexture, new PIXI.Rectangle(600, 0, 300, 350))
+      , new PIXI.Texture(characterTexture, new PIXI.Rectangle(900, 0, 300, 350))
+      , new PIXI.Texture(characterTexture, new PIXI.Rectangle(1200, 0, 300, 350))
+      , new PIXI.Texture(characterTexture, new PIXI.Rectangle(1500, 0, 300, 350))
+      , new PIXI.Texture(characterTexture, new PIXI.Rectangle(1800, 0, 300, 350))
     );
-    var charicTexture = PIXI.BaseTexture.fromImage("assets/imgs/gang_jump.png");
-    var charicJumpMotions = [];
-    charicJumpMotions.push
+    var characterJumpTexture = PIXI.BaseTexture.fromImage("assets/imgs/gang_jump.png");
+    var characterJumpMotions = [];
+    characterJumpMotions.push
     (
-      new PIXI.Texture(charicTexture, new PIXI.Rectangle(0, 0, 300, 350))
-      , new PIXI.Texture(charicTexture, new PIXI.Rectangle(300, 0, 300, 350))
-      , new PIXI.Texture(charicTexture, new PIXI.Rectangle(600, 0, 300, 350))
-      , new PIXI.Texture(charicTexture, new PIXI.Rectangle(900, 0, 300, 350))
+      new PIXI.Texture(characterJumpTexture, new PIXI.Rectangle(0, 0, 300, 350))
+      , new PIXI.Texture(characterJumpTexture, new PIXI.Rectangle(300, 0, 300, 350))
+      , new PIXI.Texture(characterJumpTexture, new PIXI.Rectangle(300, 0, 300, 350))
+      , new PIXI.Texture(characterJumpTexture, new PIXI.Rectangle(300, 0, 300, 350))
+      , new PIXI.Texture(characterJumpTexture, new PIXI.Rectangle(300, 0, 300, 350))
+      , new PIXI.Texture(characterJumpTexture, new PIXI.Rectangle(600, 0, 300, 350))
+      , new PIXI.Texture(characterJumpTexture, new PIXI.Rectangle(900, 0, 300, 350))
     );
 
-    var charicSprite = new PIXI.Sprite(charicRunMotions[0]);
-    charicSprite.position.y = HEIGHT - 400;    
+    var characterSprite = new PIXI.Sprite(characterRunMotions[0]);
+    characterSprite.position.y = HEIGHT - 400;    
 
-    runContainer.addChild(charicSprite);
-
+    runContainer.addChild(characterSprite);
 
     var motionCount = 0;
     var isJump = false;  
+    var isRun = true;
 
     var onClick = function(){
       if(isJump == true){
         return;
       }      
-      
-      motionCount = 0;
+
+      app.ticker.stop();
       isJump = true;
+      motionCount = 0;
+      app.ticker.start();
     };
 
     window.onclick = onClick;
     
     container.addChild(runContainer);
     app.stage.addChild(container);
-
+    
     app.ticker.add(function(delta) {
+
       bambooContainer.children.forEach(function(displayObject, index){
         displayObject.emit("update", {
           delta: delta
         });
       });
 
-      var motions = [];
+      var count = 0;
 
       if(isJump == true){
-        motionCount = 0;
-        motions = charicJumpMotions;
-
-        if(motions === charicJumpMotions && (motionCount / 5 < 2)){
-          charicSprite.position.y -= 100;
-        }
-        else if(motions === charicJumpMotions && (motionCount / 5 > 2)){
-          charicSprite.position.y += 100;
-        }
-
-        if((motionCount % 10) == 0){
-          charicSprite.texture = motions[(motionCount / 10)];
-        }
-        
-        if(motions === charicJumpMotions && motionCount / (10 * motions.length) == 0){
-          motionCount = 0;
-          isJump = false;
-        }
+        count = characterJumpMotions.length;
       }
-      else {
-        motions = charicRunMotions;
+      else if(isRun == true) {
+        count = characterRunMotions.length;
       }
 
-      motionCount = (motionCount + 1) % (10 * motions.length);
-
-
+      motionCount = (motionCount + 1) % (10 * count);
 
       if((motionCount % 10) == 0){
-        charicSprite.texture = motions[(motionCount / 10)];
+        if(isRun == true){
+          characterSprite.texture = characterRunMotions[(motionCount / 10)];
+        }
+        else if(isJump == true){
+          characterSprite.texture = characterJumpMotions[(motionCount / 10)];
+        }
       }
 
+      if(isJump == true){
+        if(motionCount == 0){
+          isJump = false;
+          isRun = true;
+          return;
+        }
 
+        if(motionCount % 10 == 0) {
+          if(motionCount / 10 < characterJumpMotions.length / 2) {
+            characterSprite.position.y -= 100;
+          }
+          else {
+            characterSprite.position.y += 100;
+          }
+        }
+      }
     });
   }
 
