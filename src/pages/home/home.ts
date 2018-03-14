@@ -123,6 +123,11 @@ export class HomePage {
     };
 
     window.onclick = onClick;
+    window.onkeypress = function(event){
+      if(event.keyCode == 32) {
+        onClick();
+      }
+    }
     
     container.addChild(runContainer);
 
@@ -159,12 +164,12 @@ export class HomePage {
 
       coinCount = (coinCount + delta);
 
-      if(coinCount > 180) {
+      if(coinCount > 18) {
         
         var coin = new PIXI.Sprite(coinTexture);
         coins.push(coin);
-        coin.position.x = WIDTH - 180;
-        coin.position.y = HEIGHT - 90 - 180 - (Math.random() * 700);
+        coin.position.x = WIDTH - 18;
+        coin.position.y = HEIGHT - 90 - 180 - (Math.random() * 600);
         container.addChild(coin);
 
         coinCount = 0;
@@ -220,7 +225,7 @@ export class HomePage {
         count = characterRunMotions.length;
       }
 
-      var fps = isJump == true ? 8 : 10;
+      var fps = isJump == true ? 7 : 10;
 
       motionCount = (motionCount + 1) % (fps * count);
 
