@@ -103,6 +103,7 @@ export class HomePage {
 
     var characterSprite = new PIXI.Sprite(characterRunMotions[0]);
     characterSprite.position.y = HEIGHT - 400;    
+    characterSprite.position.x += 100;
 
     runContainer.addChild(characterSprite);
 
@@ -124,14 +125,90 @@ export class HomePage {
     window.onclick = onClick;
     
     container.addChild(runContainer);
+
+    //var coinContainer = new PIXI.Container();
+    var coinTexture = PIXI.Texture.fromImage("assets/imgs/coin.png");
+    var coinEffectBaseTexture = PIXI.BaseTexture.fromImage("assets/imgs/coin_effect.png");
+    var coinEffectTexture = [];
+    coinEffectTexture.push
+    (
+      new PIXI.Texture(coinEffectBaseTexture, new PIXI.Rectangle(0, 0, 200, 200))
+      , new PIXI.Texture(coinEffectBaseTexture, new PIXI.Rectangle(0, 0, 200, 200))
+      , new PIXI.Texture(coinEffectBaseTexture, new PIXI.Rectangle(0, 0, 200, 200))
+      , new PIXI.Texture(coinEffectBaseTexture, new PIXI.Rectangle(0, 0, 200, 200))
+      , new PIXI.Texture(coinEffectBaseTexture, new PIXI.Rectangle(0, 0, 200, 200))
+      , new PIXI.Texture(coinEffectBaseTexture, new PIXI.Rectangle(200, 0, 200, 200))
+      , new PIXI.Texture(coinEffectBaseTexture, new PIXI.Rectangle(200, 0, 200, 200))
+      , new PIXI.Texture(coinEffectBaseTexture, new PIXI.Rectangle(200, 0, 200, 200))
+      , new PIXI.Texture(coinEffectBaseTexture, new PIXI.Rectangle(200, 0, 200, 200))
+      , new PIXI.Texture(coinEffectBaseTexture, new PIXI.Rectangle(200, 0, 200, 200))
+      , new PIXI.Texture(coinEffectBaseTexture, new PIXI.Rectangle(400, 0, 200, 200))
+      , new PIXI.Texture(coinEffectBaseTexture, new PIXI.Rectangle(400, 0, 200, 200))
+      , new PIXI.Texture(coinEffectBaseTexture, new PIXI.Rectangle(400, 0, 200, 200))
+      , new PIXI.Texture(coinEffectBaseTexture, new PIXI.Rectangle(400, 0, 200, 200))
+      , new PIXI.Texture(coinEffectBaseTexture, new PIXI.Rectangle(400, 0, 200, 200))
+    );
+    var coins = [];
+
+
     app.stage.addChild(container);
     
+    var coinCount = 0;
+
     app.ticker.add(function(delta) {
+
+      coinCount = (coinCount + delta);
+
+      if(coinCount > 180) {
+        
+        var coin = new PIXI.Sprite(coinTexture);
+        coins.push(coin);
+        coin.position.x = WIDTH - 180;
+        coin.position.y = HEIGHT - 90 - 180 - (Math.random() * 700);
+        container.addChild(coin);
+
+        coinCount = 0;
+      }
 
       bambooContainer.children.forEach(function(displayObject, index){
         displayObject.emit("update", {
           delta: delta
         });
+      });
+
+      coins.forEach(function(element, index){
+        element.position.x -= delta * 10;
+
+        var coin = element.getBounds();
+        var character = characterSprite.getBounds();
+
+        if( character.x <= coin.x && coin.x <= (character.x + character.width) / 2 
+        && (coin.y >= character.y)  && coin.y <= (character.y + character.height)
+        ) {
+          if(element.texture == coinTexture) {
+            element.texture = coinEffectTexture[0];
+            return;
+          }
+        }
+
+        if(element.texture != coinTexture) {
+          for(var effectIndex = 0; effectIndex < coinEffectTexture.length; effectIndex++) {
+            if(element.texture == coinEffectTexture[effectIndex]) {
+              if((effectIndex + 1) == coinEffectTexture.length) {
+                container.removeChild(element);
+                coins.splice(index, 1);
+                break;
+              }
+              
+              element.texture = coinEffectTexture[effectIndex + 1];
+              break;
+            }
+          }
+        }
+
+        if(coin.x + coin.width < 0){
+          coins.splice(index, 1);
+        }
       });
 
       var count = 0;
@@ -143,14 +220,16 @@ export class HomePage {
         count = characterRunMotions.length;
       }
 
-      motionCount = (motionCount + 1) % (10 * count);
+      var fps = isJump == true ? 8 : 10;
 
-      if((motionCount % 10) == 0){
-        if(isRun == true){
-          characterSprite.texture = characterRunMotions[(motionCount / 10)];
+      motionCount = (motionCount + 1) % (fps * count);
+
+      if((motionCount % fps) == 0) {
+        if(isRun == true) {
+          characterSprite.texture = characterRunMotions[(motionCount / fps)];
         }
-        else if(isJump == true){
-          characterSprite.texture = characterJumpMotions[(motionCount / 10)];
+        if(isJump == true){
+          characterSprite.texture = characterJumpMotions[(motionCount / fps)];
         }
       }
 
@@ -161,12 +240,12 @@ export class HomePage {
           return;
         }
 
-        if(motionCount % 10 == 0) {
-          if(motionCount / 10 < characterJumpMotions.length / 2) {
-            characterSprite.position.y -= 100;
+        if(motionCount % fps  == 0) {
+          if(motionCount / fps < characterJumpMotions.length / 2) {
+            characterSprite.position.y -= 150;
           }
           else {
-            characterSprite.position.y += 100;
+            characterSprite.position.y += 150;
           }
         }
       }
